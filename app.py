@@ -3,8 +3,10 @@ import pickle
 import pandas as pd
 import requests
 
+
 def fetch_poster(movie_id):
-    url = "https://api.themoviedb.org/3/movie/{}?language=en-US".format(movie_id)
+    url = "https://api.themoviedb.org/3/movie/{}?language=en-US".format(
+        movie_id)
 
     headers = {
         "accept": "application/json",
@@ -14,7 +16,8 @@ def fetch_poster(movie_id):
     response = requests.get(url, headers=headers)
 
     if response.status_code != 200:
-        print(f"Error fetching poster for movie_id {movie_id} → {response.status_code}")
+        print(
+            f"Error fetching poster for movie_id {movie_id} → {response.status_code}")
         return "https://via.placeholder.com/300x450?text=No+Poster"
 
     data = response.json()
@@ -29,30 +32,32 @@ def fetch_poster(movie_id):
 def recommend(movie):
     movie_index = movies[movies['title'] == movie].index[0]
     distances = similarity[movie_index]
-    movies_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x: x[1])[1:6]
+    movies_list = sorted(list(enumerate(distances)),
+                         reverse=True, key=lambda x: x[1])[1:6]
 
     recommended_movies = []
     recommended_movies_posters = []
     for i in movies_list:
         movie_id = movies.iloc[i[0]].movie_id
         recommended_movies.append(movies.iloc[i[0]].title)
-                            #fetch movie poster from API
+        # fetch movie poster from API
         recommended_movies_posters.append(fetch_poster(movie_id))
-    return recommended_movies,recommended_movies_posters
+    return recommended_movies, recommended_movies_posters
 
-movies_dict = pickle.load(open('movies_dict.pkl','rb'))
+
+movies_dict = pickle.load(open('movies_dict.pkl', 'rb'))
 movies = pd.DataFrame(movies_dict)
 
-similarity = pickle.load(open('similarity.pkl','rb'))
+similarity = pickle.load(open('similarity.pkl', 'rb'))
 
 st.title('Movie Recommender System')
 
 selected_movie_name = st.selectbox(
-    'how would you like to be cintacted?',
+    'Search Your Favourite Movie',
     movies['title'].values
 )
 if st.button("Recommend"):
-    names,posters = recommend(selected_movie_name)
+    names, posters = recommend(selected_movie_name)
     col1, col2, col3, col4, col5 = st.columns(5)
 
     with col1:
